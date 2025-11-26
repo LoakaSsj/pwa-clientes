@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PWA Clientes{% endblock %}
+
+{% block content %}
+<section class="dashboard-section fade-in">
+    <h1>Dashboard</h1>
+    <p>Bienvenido, <strong>{{ session['user']['username'] }}</strong>. Desde aquí puedes acceder a los módulos principales.</p>
+
+    <div class="dashboard-grid">
+        <a href="{{ url_for('clientes_page') }}" class="dashboard-card">
+            <h3>Módulo de Clientes</h3>
+            <p>Gestiona tus clientes y sus saldos con un CRUD completo.</p>
+            <span class="badge">CRUD</span>
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}PWA Clientes - Bienvenido{% endblock %}
+
+{% block content %}
+<section class="hero fade-in">
+    <div class="hero-text">
+        <h1>Gestiona tus clientes desde cualquier lugar</h1>
+        <p>Una <strong>Aplicación Web Progresiva</strong> rápida, moderna y lista para trabajar incluso sin conexión.</p>
+        <div class="hero-actions">
+            {% if session.get('user') %}
+                <a href="{{ url_for('dashboard') }}" class="btn-primary btn-lg">Ir al Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-primary btn-lg">Comenzar ahora</a>
+            {% endif %}
+            <a href="#features" class="btn-outline">Ver características</a>
+        </div>
+    </div>
+    <div class="hero-illustration">
+        <div class="card-sample">
+            <h3>Clientes activos</h3>
+            <p>Controla saldos, historial y más con una interfaz limpia.</p>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="features-section fade-in">
+    <h2>Características principales</h2>
+    <div class="features-grid">
+        <article class="feature-card">
+            <h3>Modo Offline</h3>
+            <p>La aplicación sigue funcionando aunque pierdas la conexión a internet gracias al Service Worker.</p>
+        </article>
+        <article class="feature-card">
+            <h3>CRUD de Clientes</h3>
+            <p>Crear, leer, actualizar y eliminar clientes con una tabla moderna y fluida.</p>
+        </article>
+        <article class="feature-card">
+            <h3>Búsquedas rápidas</h3>
+            <p>Las búsquedas recientes se guardan en <code>localStorage</code> para un acceso inmediato.</p>
+        </article>
+    </div>
+</section>
+{% endblock %}
+
+
