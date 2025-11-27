@@ -9,11 +9,13 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = os.environ.get("FLASK_SECRET_KEY", "cambia-esto-en-produccion")
 
-    app.config["DB_HOST"] = os.environ.get("DB_HOST", "localhost")
-    app.config["DB_USER"] = os.environ.get("DB_USER", "root")
-    app.config["DB_PASSWORD"] = os.environ.get("DB_PASSWORD", "")
-    app.config["DB_NAME"] = os.environ.get("DB_NAME", "pwa_clientes")
+    # --- CONFIGURACIÓN REAL DE TU BASE DE DATOS ---
+    app.config["DB_HOST"] = "185.232.14.52"
+    app.config["DB_USER"] = "u760464709_21005356_usr"
+    app.config["DB_PASSWORD"] = ";h5U3KOP"
+    app.config["DB_NAME"] = "u760464709_21005356_bd"
 
+    # Conexión a la base de datos
     def get_db_connection():
         return mysql.connector.connect(
             host=app.config["DB_HOST"],
@@ -22,35 +24,32 @@ def create_app():
             database=app.config["DB_NAME"],
         )
 
+    # Decorador login requerido
     def login_required(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if "user" not in session:
                 return redirect(url_for("login"))
             return f(*args, **kwargs)
-
         return decorated_function
 
-    # ---------- RUTAS DE PÁGINAS ----------
+    # ------------------ RUTAS ------------------
 
     @app.route("/")
     def index():
-        # Si ya está logueado, redirigir al dashboard
         if "user" in session:
             return redirect(url_for("dashboard"))
         return render_template("index.html")
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
-        # Si ya está logueado, redirigir al dashboard
         if "user" in session:
             return redirect(url_for("dashboard"))
-        
+
         if request.method == "POST":
             username = request.form.get("username")
             password = request.form.get("password")
 
-            # Usuario fijo: pepe / pepe
             if username == "pepe" and password == "pepe":
                 session["user"] = {"username": "pepe"}
                 return redirect(url_for("dashboard"))
@@ -61,7 +60,6 @@ def create_app():
 
     @app.route("/logout")
     def logout():
-        # Limpiar completamente la sesión
         session.clear()
         return redirect(url_for("index"))
 
@@ -69,23 +67,17 @@ def create_app():
     @login_required
     def dashboard():
         response = app.make_response(render_template("dashboard.html"))
-        # Evitar que se cachee la página protegida
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
         return response
 
     @app.route("/clientes")
     @login_required
     def clientes_page():
         response = app.make_response(render_template("clientes.html"))
-        # Evitar que se cachee la página protegida
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
         return response
 
-    # ---------- API REST CLIENTES ----------
+    # --------- API CLIENTES (USANDO columna monto) ---------
 
     @app.route("/api/clientes", methods=["GET"])
     @login_required
@@ -93,93 +85,78 @@ def create_app():
         try:
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT id, nombre, saldo FROM clientes ORDER BY id DESC")
+            cursor.execute("SELECT id, nombre, monto FROM clientes ORDER BY id DESC")
             rows = cursor.fetchall()
             return jsonify({"success": True, "data": rows})
         except Error as e:
             return jsonify({"success": False, "error": str(e)}), 500
         finally:
-            if "cursor" in locals():
-                cursor.close()
-            if "conn" in locals() and conn.is_connected():
-                conn.close()
+            cursor.close()
+            conn.close()
 
     @app.route("/api/clientes", methods=["POST"])
     @login_required
     def create_cliente():
         data = request.get_json()
         nombre = data.get("nombre", "").strip()
-        saldo = data.get("saldo")
+        monto = data.get("monto")
 
         if not nombre:
             return jsonify({"success": False, "error": "El nombre es obligatorio"}), 400
 
         try:
-            saldo_val = float(saldo)
-        except (TypeError, ValueError):
-            return jsonify({"success": False, "error": "Saldo inválido"}), 400
+            monto_val = float(monto)
+        except:
+            return jsonify({"success": False, "error": "Monto inválido"}), 400
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO clientes (nombre, saldo) VALUES (%s, %s)",
-                (nombre, saldo_val),
+                "INSERT INTO clientes (nombre, monto) VALUES (%s, %s)",
+                (nombre, monto_val),
             )
             conn.commit()
             new_id = cursor.lastrowid
-            return jsonify(
-                {
-                    "success": True,
-                    "data": {"id": new_id, "nombre": nombre, "saldo": saldo_val},
-                }
-            )
+            return jsonify({"success": True, "data": {"id": new_id, "nombre": nombre, "monto": monto_val}})
         except Error as e:
             return jsonify({"success": False, "error": str(e)}), 500
         finally:
-            if "cursor" in locals():
-                cursor.close()
-            if "conn" in locals() and conn.is_connected():
-                conn.close()
+            cursor.close()
+            conn.close()
 
     @app.route("/api/clientes/<int:cliente_id>", methods=["PUT"])
     @login_required
     def update_cliente(cliente_id):
         data = request.get_json()
         nombre = data.get("nombre", "").strip()
-        saldo = data.get("saldo")
+        monto = data.get("monto")
 
         if not nombre:
             return jsonify({"success": False, "error": "El nombre es obligatorio"}), 400
 
         try:
-            saldo_val = float(saldo)
-        except (TypeError, ValueError):
-            return jsonify({"success": False, "error": "Saldo inválido"}), 400
+            monto_val = float(monto)
+        except:
+            return jsonify({"success": False, "error": "Monto inválido"}), 400
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE clientes SET nombre=%s, saldo=%s WHERE id=%s",
-                (nombre, saldo_val, cliente_id),
+                "UPDATE clientes SET nombre=%s, monto=%s WHERE id=%s",
+                (nombre, monto_val, cliente_id),
             )
             conn.commit()
             if cursor.rowcount == 0:
                 return jsonify({"success": False, "error": "Cliente no encontrado"}), 404
-            return jsonify(
-                {
-                    "success": True,
-                    "data": {"id": cliente_id, "nombre": nombre, "saldo": saldo_val},
-                }
-            )
+
+            return jsonify({"success": True, "data": {"id": cliente_id, "nombre": nombre, "monto": monto_val}})
         except Error as e:
             return jsonify({"success": False, "error": str(e)}), 500
         finally:
-            if "cursor" in locals():
-                cursor.close()
-            if "conn" in locals() and conn.is_connected():
-                conn.close()
+            cursor.close()
+            conn.close()
 
     @app.route("/api/clientes/<int:cliente_id>", methods=["DELETE"])
     @login_required
@@ -195,12 +172,10 @@ def create_app():
         except Error as e:
             return jsonify({"success": False, "error": str(e)}), 500
         finally:
-            if "cursor" in locals():
-                cursor.close()
-            if "conn" in locals() and conn.is_connected():
-                conn.close()
+            cursor.close()
+            conn.close()
 
-    # ---------- RUTAS PWA ----------
+    # --------- PWA ---------
 
     @app.route("/manifest.json")
     def manifest():
@@ -215,12 +190,8 @@ def create_app():
 
 app = create_app()
 
-
 if __name__ == "__main__":
     app.run(debug=True)
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
 
 
