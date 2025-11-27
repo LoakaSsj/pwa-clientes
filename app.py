@@ -77,7 +77,7 @@ def create_app():
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         return response
 
-    # --------- API CLIENTES (USANDO columna monto) ---------
+    # --------- API CLIENTES (USANDO columna SALDO) ---------
 
     @app.route("/api/clientes", methods=["GET"])
     @login_required
@@ -85,7 +85,7 @@ def create_app():
         try:
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT id, nombre, monto FROM clientes ORDER BY id DESC")
+            cursor.execute("SELECT id, nombre, saldo FROM clientes ORDER BY id DESC")
             rows = cursor.fetchall()
             return jsonify({"success": True, "data": rows})
         except Error as e:
@@ -98,27 +98,27 @@ def create_app():
     @login_required
     def create_cliente():
         data = request.get_json()
-        nombre = data.get("nombre", "").strip()
-        monto = data.get("monto")
+        nombre = data.get("nombre", "").trim()
+        saldo = data.get("saldo")
 
         if not nombre:
             return jsonify({"success": False, "error": "El nombre es obligatorio"}), 400
 
         try:
-            monto_val = float(monto)
+            saldo_val = float(saldo)
         except:
-            return jsonify({"success": False, "error": "Monto inválido"}), 400
+            return jsonify({"success": False, "error": "Saldo inválido"}), 400
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO clientes (nombre, monto) VALUES (%s, %s)",
-                (nombre, monto_val),
+                "INSERT INTO clientes (nombre, saldo) VALUES (%s, %s)",
+                (nombre, saldo_val),
             )
             conn.commit()
             new_id = cursor.lastrowid
-            return jsonify({"success": True, "data": {"id": new_id, "nombre": nombre, "monto": monto_val}})
+            return jsonify({"success": True, "data": {"id": new_id, "nombre": nombre, "saldo": saldo_val}})
         except Error as e:
             return jsonify({"success": False, "error": str(e)}), 500
         finally:
@@ -130,28 +130,28 @@ def create_app():
     def update_cliente(cliente_id):
         data = request.get_json()
         nombre = data.get("nombre", "").strip()
-        monto = data.get("monto")
+        saldo = data.get("saldo")
 
         if not nombre:
             return jsonify({"success": False, "error": "El nombre es obligatorio"}), 400
 
         try:
-            monto_val = float(monto)
+            saldo_val = float(saldo)
         except:
-            return jsonify({"success": False, "error": "Monto inválido"}), 400
+            return jsonify({"success": False, "error": "Saldo inválido"}), 400
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE clientes SET nombre=%s, monto=%s WHERE id=%s",
-                (nombre, monto_val, cliente_id),
+                "UPDATE clientes SET nombre=%s, saldo=%s WHERE id=%s",
+                (nombre, saldo_val, cliente_id),
             )
             conn.commit()
             if cursor.rowcount == 0:
                 return jsonify({"success": False, "error": "Cliente no encontrado"}), 404
 
-            return jsonify({"success": True, "data": {"id": cliente_id, "nombre": nombre, "monto": monto_val}})
+            return jsonify({"success": True, "data": {"id": cliente_id, "nombre": nombre, "saldo": saldo_val}})
         except Error as e:
             return jsonify({"success": False, "error": str(e)}), 500
         finally:
@@ -192,6 +192,7 @@ app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
