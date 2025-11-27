@@ -23,6 +23,25 @@
         </div>
     </div>
 
+    <!-- Tabla de Cambios Pendientes (Offline) -->
+    <div id="pendingChangesContainer" class="pending-changes-container hidden">
+        <div class="pending-header">
+            <h3>⚠️ Cambios pendientes de sincronización</h3>
+            <p>Estás offline. Estos cambios se guardarán cuando recuperes la conexión.</p>
+        </div>
+        <table class="table table-pending">
+            <thead>
+                <tr>
+                    <th>Acción</th>
+                    <th>Datos</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody id="pendingChangesBody">
+            </tbody>
+        </table>
+    </div>
+
     <div class="table-wrapper">
         <table class="table">
             <thead>
@@ -68,5 +87,8 @@
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/clientes.js') }}"></script>
 {% endblock %}
+
+
+
 
 
