@@ -480,4 +480,70 @@ button {
     }
 }
 
+/* Pending Changes Table */
+.pending-changes-container {
+    margin-top: 1.5rem;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    animation: fadeInUp 0.5s ease;
+}
+
+.pending-header {
+    margin-bottom: 1rem;
+}
+
+.pending-header h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    color: #856404;
+}
+
+.pending-header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #856404;
+}
+
+.table-pending {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 0.5rem;
+}
+
+.table-pending th {
+    background: rgba(0, 0, 0, 0.03);
+    color: #856404;
+}
+
+.badge.create {
+    background: #d4edda;
+    color: #155724;
+    position: static; /* Override absolute positioning from generic badge */
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.badge.update {
+    background: #cce5ff;
+    color: #004085;
+    position: static;
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.badge.delete {
+    background: #f8d7da;
+    color: #721c24;
+    position: static;
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+
+
+
 
